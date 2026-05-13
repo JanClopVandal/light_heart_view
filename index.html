@@ -6,6 +6,12 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700&display=swap" />
+<link rel="preload" as="image" href="./assets/gallery1.jpg" />
+<link rel="preload" as="image" href="./assets/gallery2.jpg" />
+<link rel="preload" as="image" href="./assets/gallery3.jpg" />
+<link rel="preload" as="image" href="./assets/gallery4.jpg" />
+<link rel="preload" as="image" href="./assets/gallery5.jpg" />
+<link rel="preload" as="image" href="./assets/gallery6.jpg" />
 <style>
   :root {
     --ink-1: rgb(16,16,18);
@@ -40,6 +46,15 @@
     overflow: hidden;
     background: var(--ink-0);
   }
+  .section.half {
+    height: calc(540px * var(--scale));
+  }
+  .section.half .stage {
+    height: 540px;
+  }
+  .section.half .bottombar {
+    top: 513px;
+  }
   .stage {
     position: absolute;
     left: 0; top: 0;
@@ -50,34 +65,60 @@
     color: rgba(255,255,255,0.92);
   }
 
-  /* Top breadcrumb */
-  .topbar {
-    position: absolute;
-    left: 50px; top: 50px;
-    width: 1820px; height: 23px;
+  /* Sticky top bar */
+  .topnav {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw;
+    height: 56px;
+    z-index: 100;
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    font-family: var(--display);
+    justify-content: space-between;
+    padding: 0 28px;
+    background: rgba(10,10,12,0.32);
+    backdrop-filter: blur(18px) saturate(140%);
+    -webkit-backdrop-filter: blur(18px) saturate(140%);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+  .topnav a, .topnav button {
+    appearance: none;
+    background: none;
+    border: 0;
+    cursor: pointer;
+    color: rgba(255,255,255,0.92);
+    font-family: "Helvetica Neue", "Helvetica", "Arial Black", Arial, sans-serif;
     font-weight: 700;
-    font-size: 20px;
-    line-height: 0.96;
-    letter-spacing: -0.04em;
-    color: var(--soft);
-    z-index: 5;
+    font-size: 16px;
+    line-height: 1;
+    letter-spacing: -0.03em;
+    text-decoration: none;
+    padding: 8px 12px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: background 0.2s ease, color 0.2s ease;
   }
-  .topbar span { white-space: nowrap; }
-
-  .bottombar {
-    position: absolute;
-    left: 0; top: 1053px;
-    width: 1920px; height: 27px;
-    background-color: var(--blue-deeper);
-    z-index: 5;
+  .topnav a:hover, .topnav button:hover {
+    background: rgba(255,255,255,0.08);
+    color: #fff;
   }
-  .bottombar .topbar {
-    position: absolute;
-    left: 50px; top: 2px;
+  .topnav .arrow {
+    display: inline-block;
+    width: 12px; height: 12px;
+    transform: translateY(-1px);
+  }
+  #backToTop {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-4px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+  }
+  #backToTop.visible {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
   }
 
   /* ── Diag-bg per Figma matrix(0,1,-1,0,…) — two 1080×1407 panels rotated 90°,
@@ -121,11 +162,21 @@
     position: absolute;
     left: -54px; top: -217px;
     width: 2028px; height: 1349px;
-    opacity: 0.8;
+    opacity: 0.62;
     background:
-      linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.2) 52%, rgba(0,0,0,0) 100%),
-      linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)),
+      linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.25) 52%, rgba(0,0,0,0) 100%),
+      linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.55)),
       url("./assets/title-bg.png") center / cover no-repeat;
+  }
+  .pixel-section { cursor: crosshair; }
+  .pixel-canvas {
+    position: absolute;
+    inset: 0;
+    width: 1920px;
+    height: 1080px;
+    pointer-events: none;
+    z-index: 2;
+    mix-blend-mode: difference;
   }
   .title-vignette {
     position: absolute; inset: 0;
@@ -245,17 +296,24 @@
     width: 1820px; height: 3px;
     background: var(--hair);
   }
-  .ix-num {
+  .ix-row {
     position: absolute; left: 0;
+    width: 1820px;
+    display: flex;
+    align-items: center;
+  }
+  .ix-row .ix-num {
+    position: static;
     width: 80px; margin: 0;
+    flex: 0 0 80px;
     font-family: var(--body);
     font-size: 28px; line-height: 0.96; letter-spacing: -0.04em;
     color: rgba(255,255,255,0.85);
   }
-  .ix-copy {
-    position: absolute;
-    left: 1220px;
-    width: 600px; margin: 0;
+  .ix-row .ix-copy {
+    position: static;
+    margin: 0 0 0 1140px;
+    width: 600px;
     font-family: var(--body);
     font-size: 28px; line-height: 1.18; letter-spacing: -0.02em;
     color: rgba(255,255,255,0.85);
@@ -321,60 +379,72 @@
     left: 50px; top: 250px;
     width: 1820px; height: 790px;
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr 1fr;
-    grid-template-rows: 1fr 1fr;
     gap: 14px;
+    grid-template-columns: 444.5px 444.5px 444.5px 444.5px;
+    grid-template-rows: 388px 388px;
     filter: drop-shadow(0 0 220px rgba(73,161,255,0.18));
+    transition: grid-template-columns 1.4s cubic-bezier(.22,.9,.2,1),
+                grid-template-rows    1.4s cubic-bezier(.22,.9,.2,1);
+    will-change: grid-template-columns, grid-template-rows;
   }
   .gallery-grid .tile {
     position: relative;
     overflow: hidden;
     border-radius: 18px;
-    background: #0b0b0e var(--src) center / cover no-repeat;
-    background-position: var(--pos, center);
+    background-color: #0b0b0e;
     background-image: var(--src);
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: var(--pos, center);
+    min-width: 0; min-height: 0;
+    transition: filter 0.9s ease, box-shadow 0.9s ease;
   }
+  /* Asymmetric placement */
+  .gallery-grid .t1 { grid-column: 1 / span 1; grid-row: 1 / span 1; }
+  .gallery-grid .t2 { grid-column: 2 / span 2; grid-row: 1 / span 1; }
+  .gallery-grid .t3 { grid-column: 4 / span 1; grid-row: 1 / span 1; }
+  .gallery-grid .t4 { grid-column: 1 / span 1; grid-row: 2 / span 1; }
+  .gallery-grid .t5 { grid-column: 2 / span 1; grid-row: 2 / span 1; }
+  .gallery-grid .t6 { grid-column: 3 / span 2; grid-row: 2 / span 1; }
+
+  /* Displacement: non-hovered tiles dim slightly */
+  .gallery-grid.hovering .tile        { filter: brightness(0.68) saturate(0.85); }
+  .gallery-grid.hovering .tile:hover  { filter: brightness(1.05) saturate(1.05); }
+
   .gallery-grid .tile::after {
     content: "";
     position: absolute; inset: 0;
     background: linear-gradient(180deg, rgba(0,0,0,0) 55%, rgba(0,0,0,0.45) 100%);
     pointer-events: none;
   }
-  /* Asymmetric placement — gallery2 is the only landscape, give it the wide cell */
-  .gallery-grid .t1 { grid-column: 1 / span 1; grid-row: 1 / span 1; }
-  .gallery-grid .t2 { grid-column: 2 / span 2; grid-row: 1 / span 1; } /* wide landscape */
-  .gallery-grid .t3 { grid-column: 4 / span 1; grid-row: 1 / span 1; }
-  .gallery-grid .t4 { grid-column: 1 / span 1; grid-row: 2 / span 1; }
-  .gallery-grid .t5 { grid-column: 2 / span 1; grid-row: 2 / span 1; }
-  .gallery-grid .t6 { grid-column: 3 / span 2; grid-row: 2 / span 1; } /* wide bottom-right */
 
-  /* ── Credits (frame 11) — height halved ── */
+  /* ── Credits (frame 11) ─ compact block ── */
   .credits-block {
     position: absolute;
     left: 50%; top: 50%;
     transform: translate(-50%, -50%);
     width: 564px;
-    height: 220px;
+    height: 110px;
   }
   .credits-logo {
     position: absolute;
     left: 50%; top: 0;
     transform: translateX(-50%);
-    width: 200px; height: 89px;
+    width: 100px; height: 45px;
     background: url("./assets/eto-logo.png") center / contain no-repeat;
-    filter: drop-shadow(0 0 60px rgba(73,161,255,0.4));
+    filter: drop-shadow(0 0 40px rgba(73,161,255,0.4));
   }
   .credits-list {
     position: absolute;
-    left: 0; top: 130px;
+    left: 0; top: 65px;
     width: 564px;
     text-align: center;
     font-family: var(--body);
-    font-size: 28px; line-height: 0.96; letter-spacing: -0.04em;
+    font-size: 18px; line-height: 0.96; letter-spacing: -0.04em;
     color: rgba(255,255,255,0.85);
   }
+  .credits-list .row + .row { margin-top: 10px; }
   .credits-list .row { display: block; }
-  .credits-list .row + .row { margin-top: 20px; }
 
   .progress {
     position: fixed;
@@ -394,14 +464,25 @@
 </head>
 <body>
 
+<nav class="topnav">
+  <a href="https://janclopvandal.github.io/Eto_portfolio/" target="_blank" rel="noopener">эto</a>
+  <button type="button" id="backToTop">
+    Top
+    <svg class="arrow" viewBox="0 0 12 12" aria-hidden="true">
+      <path d="M6 1.5 L6 10.5 M2 5.5 L6 1.5 L10 5.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    </svg>
+  </button>
+</nav>
+
 <main id="case">
 
   <!-- 01 Title -->
-  <section class="section" data-screen-label="01 Title">
+  <section class="section title-section pixel-section" data-screen-label="01 Title">
     <div class="stage" style="background: var(--ink-1);">
       <div class="diag-bg"></div>
       <div class="title-photo"></div>
       <div class="title-vignette"></div>
+      <canvas class="pixel-canvas" data-pixel-canvas width="1920" height="1080"></canvas>
       <div class="title-block">
         <p class="title-eyebrow">Interactive Light Installation</p>
         <h1 class="title-word">Light Heart</h1>
@@ -411,14 +492,10 @@
   </section>
 
   <!-- 02 About -->
-  <section class="section" data-screen-label="02 About">
+  <section class="section pixel-section" data-screen-label="02 About">
     <div class="stage" style="background: var(--ink-0);">
       <div class="about-bg"></div>
-      <div class="topbar">
-        <span>эto</span>
-        <span>Light Heart</span>
-        <span>Interactive Light Installation</span>
-      </div>
+      <canvas class="pixel-canvas" data-pixel-canvas width="1920" height="1080"></canvas>
       <div class="about-block">
         <h2 class="display-h1">About</h2>
         <p class="body-text">Light Heart is an interactive installation that addresses the image of a tower built in the shape of a heart — a symbol of unification, light and joint action.</p>
@@ -430,11 +507,6 @@
   <section class="section" data-screen-label="03 Video">
     <div class="stage" style="background: var(--ink-1);">
       <div class="diag-bg"></div>
-      <div class="topbar">
-        <span>эto</span>
-        <span>Light Heart</span>
-        <span>Interactive Light Installation</span>
-      </div>
       <div class="video-wrap">
         <iframe
           src="https://www.youtube.com/embed/VV9tc61gGq8?si=qwtUeyuJke1cSkG_"
@@ -447,27 +519,18 @@
   </section>
 
   <!-- 04 Render -->
-  <section class="section" data-screen-label="04 Render">
+  <section class="section pixel-section" data-screen-label="04 Render">
     <div class="stage">
       <div class="image-fill">
         <div class="img grad-soft" style="background-image:url('./assets/frame4.jpg');"></div>
       </div>
-      <div class="topbar">
-        <span>эto</span>
-        <span>Light Heart</span>
-        <span>Interactive Light Installation</span>
-      </div>
+      <canvas class="pixel-canvas" data-pixel-canvas width="1920" height="1080"></canvas>
     </div>
   </section>
 
   <!-- 05 Tech & Implementation -->
   <section class="section" data-screen-label="05 Tech &amp; Implementation">
     <div class="stage" style="background: var(--ink-0);">
-      <div class="topbar">
-        <span>эto</span>
-        <span>Light Heart</span>
-        <span>Interactive Light Installation</span>
-      </div>
       <div class="tech-block">
         <h2 class="display-h1">Technology<br/>&amp; Implementation</h2>
         <div class="tech-paras">
@@ -482,22 +545,17 @@
   <section class="section" data-screen-label="06 Build Gallery">
     <div class="stage" style="background: var(--ink-1);">
       <div class="diag-bg"></div>
-      <div class="topbar">
-        <span>эto</span>
-        <span>Light Heart</span>
-        <span>Interactive Light Installation</span>
-      </div>
       <div class="gallery-head">
         <h2>Build &amp; Install</h2>
         <span class="meta">Documentation · 6 Frames</span>
       </div>
-      <div class="gallery-grid">
-        <div class="tile t1" style="--src:url('./assets/gallery4.jpg'); --pos: center;"></div>
-        <div class="tile t2" style="--src:url('./assets/gallery2.jpg'); --pos: center 35%;"></div>
-        <div class="tile t3" style="--src:url('./assets/gallery5.jpg'); --pos: center;"></div>
-        <div class="tile t4" style="--src:url('./assets/gallery6.jpg'); --pos: center;"></div>
-        <div class="tile t5" style="--src:url('./assets/gallery3.jpg'); --pos: center;"></div>
-        <div class="tile t6" style="--src:url('./assets/gallery1.jpg'); --pos: center 40%;"></div>
+      <div class="gallery-grid" id="buildGallery">
+        <div class="tile t1" data-cols="1"   data-row="1" data-aspect="0.75"  style="--src:url('./assets/gallery4.jpg'); --pos: center;"></div>
+        <div class="tile t2" data-cols="2,3" data-row="1" data-aspect="1.333" style="--src:url('./assets/gallery2.jpg'); --pos: center 35%;"></div>
+        <div class="tile t3" data-cols="4"   data-row="1" data-aspect="0.75"  style="--src:url('./assets/gallery5.jpg'); --pos: center;"></div>
+        <div class="tile t4" data-cols="1"   data-row="2" data-aspect="0.75"  style="--src:url('./assets/gallery6.jpg'); --pos: center;"></div>
+        <div class="tile t5" data-cols="2"   data-row="2" data-aspect="0.75"  style="--src:url('./assets/gallery3.jpg'); --pos: center;"></div>
+        <div class="tile t6" data-cols="3,4" data-row="2" data-aspect="0.75"  style="--src:url('./assets/gallery1.jpg'); --pos: center 40%;"></div>
       </div>
     </div>
   </section>
@@ -506,26 +564,27 @@
   <section class="section" data-screen-label="07 Interaction">
     <div class="stage" style="background: var(--blue-deep);">
       <div class="diag-bg deep"></div>
-      <div class="topbar">
-        <span>эto</span>
-        <span>Light Heart</span>
-        <span>Interactive Light Installation</span>
-      </div>
       <div class="ix-wrap">
         <h2 class="interaction-h2">Interaction</h2>
         <p class="interaction-intro">The installation works in three states:</p>
 
         <div class="ix-divider" style="top: 295px;"></div>
-        <div class="ix-num"  style="top: 338px;">(1)</div>
-        <div class="ix-copy" style="top: 338px;">In standby mode, it shows generative graphics and a quiet glow.</div>
+        <div class="ix-row" style="top: 295px; height: 137px;">
+          <div class="ix-num">(1)</div>
+          <div class="ix-copy">In standby mode, it shows generative graphics and a quiet glow.</div>
+        </div>
 
         <div class="ix-divider" style="top: 432px;"></div>
-        <div class="ix-num"  style="top: 475px;">(2)</div>
-        <div class="ix-copy" style="top: 475px;">As the audience approaches, visual and light dynamics are activated, creating a live response effect.</div>
+        <div class="ix-row" style="top: 432px; height: 176px;">
+          <div class="ix-num">(2)</div>
+          <div class="ix-copy">As the audience approaches, visual and light dynamics are activated, creating a live response effect.</div>
+        </div>
 
         <div class="ix-divider" style="top: 608px;"></div>
-        <div class="ix-num"  style="top: 651px;">(3)</div>
-        <div class="ix-copy" style="top: 651px;">Through the Telegram bot, viewers can send their messages, which become part of the overall light stream.</div>
+        <div class="ix-row" style="top: 608px; height: 136px;">
+          <div class="ix-num">(3)</div>
+          <div class="ix-copy">Through the Telegram bot, viewers can send their messages, which become part of the overall light stream.</div>
+        </div>
 
         <div class="ix-divider" style="top: 744px;"></div>
       </div>
@@ -533,21 +592,17 @@
   </section>
 
   <!-- 10 Render -->
-  <section class="section" data-screen-label="08 Render">
+  <section class="section pixel-section" data-screen-label="08 Render">
     <div class="stage" style="background: var(--ink-1);">
       <div class="image-fill">
         <div class="img" style="background-image:url('./assets/frame10.jpg');"></div>
       </div>
-      <div class="topbar">
-        <span>эto</span>
-        <span>Light Heart</span>
-        <span>Interactive Light Installation</span>
-      </div>
+      <canvas class="pixel-canvas" data-pixel-canvas width="1920" height="1080"></canvas>
     </div>
   </section>
 
   <!-- 11 Credits -->
-  <section class="section" data-screen-label="09 Credits">
+  <section class="section half" data-screen-label="09 Credits">
     <div class="stage" style="background: var(--ink-0);">
       <div class="diag-bg solid-left"></div>
       <div class="credits-block">
@@ -555,13 +610,6 @@
         <div class="credits-list">
           <div class="row">Technical Director &amp; Producer VLAD POLYAKOV</div>
           <div class="row">Art Director DANIL MATVIENKO</div>
-        </div>
-      </div>
-      <div class="bottombar">
-        <div class="topbar">
-          <span>эto</span>
-          <span>Light Heart</span>
-          <span>Interactive Light Installation</span>
         </div>
       </div>
     </div>
@@ -572,6 +620,21 @@
 <div class="progress"><div class="bar" id="bar"></div></div>
 
 <script>
+  // Smooth scroll back to top from the floating nav
+  const backToTopBtn = document.getElementById('backToTop');
+  backToTopBtn?.addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+  // Show the Top button only once the user has scrolled past slide 1
+  function syncTopBtn(){
+    if (!backToTopBtn) return;
+    const threshold = window.innerHeight * 0.6;
+    backToTopBtn.classList.toggle('visible', window.scrollY > threshold);
+  }
+  window.addEventListener('scroll', syncTopBtn, { passive: true });
+  window.addEventListener('resize', syncTopBtn);
+  syncTopBtn();
+
   const root = document.documentElement;
   function fit() {
     const w = root.clientWidth;
@@ -589,6 +652,193 @@
   document.addEventListener('scroll', updateBar, {passive:true});
   window.addEventListener('resize', updateBar);
   updateBar();
+
+  /* ── Build Gallery: bidirectional displacement sized to each photo's aspect ── */
+  (function(){
+    const grid = document.getElementById('buildGallery');
+    if (!grid) return;
+    const tiles = [...grid.querySelectorAll('.tile')];
+
+    const GRID_W = 1820, GRID_H = 790, GAP = 14;
+    const AVAIL_W = GRID_W - 3*GAP; // 1778 across 4 cols
+    const AVAIL_H = GRID_H - 1*GAP; // 776 across 2 rows
+
+    function restCols(){ return [AVAIL_W/4, AVAIL_W/4, AVAIL_W/4, AVAIL_W/4]; }
+    function restRows(){ return [AVAIL_H/2, AVAIL_H/2]; }
+
+    function fmtPx(arr){ return arr.map(n => n.toFixed(2)+'px').join(' '); }
+
+    function setGrid(cols, rows){
+      grid.style.setProperty('grid-template-columns', fmtPx(cols));
+      grid.style.setProperty('grid-template-rows',    fmtPx(rows));
+    }
+
+    /** Solve hover sizes so the hovered cell matches the photo aspect AND grows in both dims. */
+    function computeHover(colsIdx, rowIdx, aspect){
+      const K = colsIdx.length;
+      const restCol = AVAIL_W / 4;   // 444.5
+      const restRow = AVAIL_H / 2;   // 388
+
+      function solve(h, forceWh){
+        let Wh, cellW;
+        if (forceWh !== undefined) {
+          Wh = forceWh;
+          cellW = K * Wh + (K - 1) * GAP;
+        } else {
+          cellW = aspect * h;
+          Wh = (cellW - (K - 1) * GAP) / K;
+        }
+        const Ws = (4 - K) > 0 ? (AVAIL_W - K * Wh) / (4 - K) : 0;
+        return { cellW, Wh, Ws };
+      }
+
+      // Step 1 — find the largest cellH where the aspect-matched cell grows in BOTH dims
+      const maxH = AVAIL_H * 0.92;     // 713.9
+      const minH = restRow * 1.05;     // must grow vertically
+      let bestH = null;
+      for (let h = maxH; h >= minH; h -= 4){
+        const { Wh, Ws } = solve(h);
+        if (Wh > restCol * 1.04 && Ws > 60) { bestH = h; break; }
+      }
+
+      if (bestH !== null) {
+        const { Wh, Ws } = solve(bestH);
+        return assemble(bestH, Wh, Ws, colsIdx, rowIdx);
+      }
+
+      // Step 2 — impossible to match aspect (e.g. portrait photo in a 2-col span):
+      // accept a slight crop via `cover` to guarantee growth in both dims.
+      const fallbackH = AVAIL_H * 0.86;
+      const aspectWh = (aspect * fallbackH - (K - 1) * GAP) / K;
+      const Wh = Math.max(aspectWh, restCol * 1.15);
+      const Ws = (AVAIL_W - K * Wh) / (4 - K);
+      return assemble(fallbackH, Wh, Ws, colsIdx, rowIdx);
+    }
+
+    function assemble(Hh, Wh, Ws, colsIdx, rowIdx){
+      const cols = [Ws, Ws, Ws, Ws];
+      colsIdx.forEach(i => cols[i] = Wh);
+      const rows = [AVAIL_H - Hh, AVAIL_H - Hh];
+      rows[rowIdx] = Hh;
+      return { cols, rows };
+    }
+
+    function reset(){
+      grid.classList.remove('hovering');
+      setGrid(restCols(), restRows());
+    }
+
+    tiles.forEach(tile => {
+      const colsIdx = tile.dataset.cols.split(',').map(n => parseInt(n,10) - 1);
+      const rowIdx  = parseInt(tile.dataset.row, 10) - 1;
+      const aspect  = parseFloat(tile.dataset.aspect);
+      tile.addEventListener('mouseenter', () => {
+        grid.classList.add('hovering');
+        const { cols, rows } = computeHover(colsIdx, rowIdx, aspect);
+        setGrid(cols, rows);
+      });
+    });
+    grid.addEventListener('mouseleave', reset);
+    reset();
+
+    // Warm-up: decode gallery images and force one layout/paint cycle so the
+    // first hover doesn't stall while the browser lazily uploads textures.
+    const warmSources = tiles.map(t => {
+      const m = (t.style.getPropertyValue('--src') || '').match(/url\(['"]?(.*?)['"]?\)/);
+      return m ? m[1] : null;
+    }).filter(Boolean);
+    Promise.all(warmSources.map(src => {
+      const img = new Image();
+      img.src = src;
+      return img.decode ? img.decode().catch(()=>{}) : new Promise(r => { img.onload = img.onerror = r; });
+    })).then(() => {
+      // Trigger a transient transform on each tile to force GPU upload
+      tiles.forEach(t => {
+        t.style.transform = 'translateZ(0)';
+        // force layout read
+        void t.offsetWidth;
+      });
+      requestAnimationFrame(() => {
+        tiles.forEach(t => { t.style.transform = ''; });
+      });
+    });
+  })();
+
+  /* ── Pixel field on the title + about slides ── */
+  (function(){
+    const sections = [...document.querySelectorAll('.pixel-section')];
+    if (!sections.length) return;
+
+    sections.forEach(section => {
+      const canvas = section.querySelector('canvas[data-pixel-canvas]');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const W = canvas.width, H = canvas.height;
+
+      const CELL = 28;
+      const COLS = Math.ceil(W / CELL);
+      const ROWS = Math.ceil(H / CELL);
+
+      let mouseX = -9999, mouseY = -9999;
+      let inside = false;
+      let lastClientX = -9999, lastClientY = -9999;
+
+      function updateFromClient(){
+        if (lastClientX < 0) return;
+        const r = section.getBoundingClientRect();
+        inside = lastClientX >= r.left && lastClientX <= r.right
+               && lastClientY >= r.top  && lastClientY <= r.bottom;
+        if (inside){
+          mouseX = (lastClientX - r.left) / r.width  * W;
+          mouseY = (lastClientY - r.top)  / r.height * H;
+        }
+      }
+
+      window.addEventListener('mousemove', (e) => {
+        lastClientX = e.clientX;
+        lastClientY = e.clientY;
+        updateFromClient();
+      }, {passive: true});
+      window.addEventListener('scroll', updateFromClient, {passive: true});
+      window.addEventListener('resize', updateFromClient);
+
+      // Render-only — no trail, no per-cell state. The stamp lives only where
+      // the cursor is right now.
+      function frame(){
+        ctx.clearRect(0, 0, W, H);
+        if (inside){
+          const RADIUS = 2;
+          const cx = Math.round(mouseX / CELL);
+          const cy = Math.round(mouseY / CELL);
+          for (let j = -RADIUS; j <= RADIUS; j++){
+            for (let i = -RADIUS; i <= RADIUS; i++){
+              const cc = cx + i, rr = cy + j;
+              if (cc < 0 || cc >= COLS || rr < 0 || rr >= ROWS) continue;
+              const d = Math.hypot(i, j);
+              if (d > RADIUS) continue;
+              const falloff = Math.pow(1 - d / RADIUS, 2.2);
+              const jitter = 0.78 + Math.random() * 0.22;
+              const v = falloff * jitter;
+              if (v < 0.06) continue;
+              const a = Math.min(1, v);
+              const size = CELL - 4;
+              const x = cc * CELL + 2;
+              const y = rr * CELL + 2;
+              if (v > 0.55){
+                ctx.fillStyle = `rgba(200,230,255,${(v - 0.55) * 0.4})`;
+                ctx.fillRect(x - 4, y - 4, size + 8, size + 8);
+              }
+              ctx.fillStyle = `rgba(190,220,255,${a})`;
+              ctx.fillRect(x, y, size, size);
+            }
+          }
+        }
+        requestAnimationFrame(frame);
+      }
+      requestAnimationFrame(frame);
+    });
+  })();
+
 </script>
 </body>
 </html>
